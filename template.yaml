@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+
+  S3IndexerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python2.7
+      CodeUri: s3://alex-mattson-demo-code/serverless_sam_test.zip # pointing to a sample code location
+      Policies: AdministratorAccess # being lazy and pointing to an overly permissive policy
+      MemorySize: 128
+      Timeout: 3
+    Environment:
+        Variables:
+          TABLE_NAME: !Ref IndexTable
+    Events:
+        ObjectUpload:
+          Type: S3
+          Properties:
+            Bucket: !Ref Bucket
+            Events: s3:ObjectCreated:*
+
+  IndexTable:
+     Type: AWS::DynamoDB::Table
+     Properties:
+       AttributeDefinitions:
+         - AttributeName: customerId # going to use a dummy ID here in the Lambda function
+           AttributeType: S
+         - AttributeName: isoTimestamp # ISO timestamp as range key
+           AttributeType: S
+       KeySchema:
+         - AttributeName: customerId
+           KeyType: HASH
+         - AttributeName: isoTimestamp
+           KeyType: RANGE
+       ProvisionedThroughput:
+         ReadCapacityUnits: 5
+         WriteCapacityUnits: 5
+
+  Bucket:
+    Type: AWS::S3::Bucket
