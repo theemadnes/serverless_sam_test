@@ -5,7 +5,7 @@ import boto3
 import os
 import urllib
 
-# set up client connection to DynamoDB outside of lambda_handler using environment variables
+# set up client connection to DynamoDB outside of lambda_handler using an environment variable
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ['TABLE_NAME'])
 
